@@ -3,6 +3,11 @@
 ## Description
 Rayforce is a lightweight 3d physics game engine, with the purpose of having the maximum performance.
 
+### Troubleshooting
+**On Linux / Raspberry Pi:**
+If the engine fails to start, force the OpenGL version by running:
+`export MESA_GL_VERSION_OVERRIDE=3.3 && ./RayForce`
+
 ## Acknowledgments and Legal Notices
 
 **RayForce** is an open-source project that integrates third-party technologies. By using this software, you acknowledge and agree to the license terms of the following components:
