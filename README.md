@@ -3,6 +3,47 @@
 ## Description
 Rayforce is a lightweight 3d physics game engine, with the purpose of having the maximum performance.
 
+---
+## Requirements & Dependencies
+
+This project relies on the following core libraries:
+* **Raylib:** Used for rendering and window management.
+* **NVIDIA PhysX:** Utilized for high-performance physics simulations.
+
+---
+## Installation
+
+To get a local copy up and running, follow these steps:
+
+### 1. Clone the Repository
+Clone the project using Git:
+`git clone https://github.com/Alvareos11/RayForce.git`
+
+### 2. Install extern Dependencies
+
+**Visual Estudio 2022:**
+First open **RayForce.sln** with Visual Studio, then run the comand
+`donet restore`.
+
+**Others IDEs:**
+Follow the installation documentation of the extern Dependencies for your OS:
+* **Raylib:** Refer to the [Raylib Wiki: Working on Platforms](https://github.com/raysan5/raylib/wiki/Working-on-Platforms) for detailed installation guides on Windows (MinGW/MSVC), Linux, and macOS.
+* **NVIDIA PhysX:** Follow the build and setup instructions in the [NVIDIA PhysX Official Repository](https://github.com/NVIDIA-Omniverse/PhysX#quick-start). You will need to compile the SDK for your specific platform to obtain the necessary libraries.
+
+### 3. Compilation
+
+**Visual Studio 2022** 
+Open **RayForce.sln** and the press F5.
+
+**Cmake (Cross-Platform):**
+Run the following comands from the root directory:
+`cd RayForce`
+`mkdir build`
+`cd build`
+`cmake ..`
+`make`.
+
+---
 ### Troubleshooting
 **On Linux / Raspberry Pi:**
 If the engine fails to start, force the OpenGL version by running:
