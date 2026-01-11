@@ -34,6 +34,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="resources\models\Cube.glb" />
+    <None Include="resources\models\DamagedHelmet.glb" />
     <None Include="resources\shaders\basic.fs" />
     <None Include="resources\shaders\instancing.vs" />
     <None Include="src\managers\materials.list" />
@@ -50,6 +52,9 @@
     <ClInclude Include="src\managers\model.h" />
     <ClInclude Include="src\window.h" />
     <ClInclude Include="src\scenes\test.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
