@@ -29,44 +29,15 @@ Entity::~Entity() {
  */
 void Entity::PhysicsUpdate() {
     if (hitbox != nullptr) {
-        // Retrieve the global transform from the PhysX actor
-        PxTransform transform = hitbox->getGlobalPose();
-
-        // 1. Sync Position and Orientation (Quaternion)
+        // Sync Position and Orientation (Quaternion)
         position = { transform.p.x, transform.p.y, transform.p.z };
         rotationQuat = { transform.q.x, transform.q.y, transform.q.z, transform.q.w };
 
-        // 2. Convert Quaternion to Euler angles (Degrees) for high-level logic
+        // Convert Quaternion to Euler angles (Degrees) for high-level logic
         Vector3 eulerRadians = QuaternionToEuler(rotationQuat);
         rotation.x = eulerRadians.x * RAD2DEG;
         rotation.y = eulerRadians.y * RAD2DEG;
         rotation.z = eulerRadians.z * RAD2DEG;
-
-        // 3. Convert PhysX 4x4 Matrix to Raylib Matrix for efficient rendering
-        PxMat44 physxMat(transform);
-
-        // Map column-major PhysX matrix to Raylib's worldMatrix structure
-        // Rotation and Scaling (3x3 Block)
-        worldMatrix.m0 = physxMat.column0.x;
-        worldMatrix.m1 = physxMat.column0.y;
-        worldMatrix.m2 = physxMat.column0.z;
-        worldMatrix.m3 = physxMat.column0.w;
-
-        worldMatrix.m4 = physxMat.column1.x;
-        worldMatrix.m5 = physxMat.column1.y;
-        worldMatrix.m6 = physxMat.column1.z;
-        worldMatrix.m7 = physxMat.column1.w;
-
-        worldMatrix.m8 = physxMat.column2.x;
-        worldMatrix.m9 = physxMat.column2.y;
-        worldMatrix.m10 = physxMat.column2.z;
-        worldMatrix.m11 = physxMat.column2.w;
-
-        // Translation/Position
-        worldMatrix.m12 = physxMat.column3.x;
-        worldMatrix.m13 = physxMat.column3.y;
-        worldMatrix.m14 = physxMat.column3.z;
-        worldMatrix.m15 = 1.0f; // Homogeneous coordinates
 
         // Sync Velocity for AI or game logic usage
         PxVec3 v = hitbox->getLinearVelocity();
@@ -92,16 +63,46 @@ void Entity::Sync() {
  * Submits the current world matrix to the RenderManager for Hardware Instancing.
  */
 void Entity::Render() {
-    if (model) {
-        Window::renderManager->AddModelToRenderBuffer(model, worldMatrix);
+    if (model && hitbox) {
+        // Get the trasnform
+        transform = hitbox->getGlobalPose();
+
+        // Convert PhysX 4x4 Matrix to Raylib Matrix for efficient rendering
+        PxMat44 physxMat(transform);
+        Matrix renderMat;
+
+        // Map column-major PhysX matrix to Raylib's worldMatrix structure
+        // Rotation and Scaling (3x3 Block)
+        renderMat.m0 = physxMat.column0.x;
+        renderMat.m1 = physxMat.column0.y;
+        renderMat.m2 = physxMat.column0.z;
+        renderMat.m3 = physxMat.column0.w;
+
+        renderMat.m4 = physxMat.column1.x;
+        renderMat.m5 = physxMat.column1.y;
+        renderMat.m6 = physxMat.column1.z;
+        renderMat.m7 = physxMat.column1.w;
+
+        renderMat.m8 = physxMat.column2.x;
+        renderMat.m9 = physxMat.column2.y;
+        renderMat.m10 = physxMat.column2.z;
+        renderMat.m11 = physxMat.column2.w;
+
+        // Translation/Position
+        renderMat.m12 = physxMat.column3.x;
+        renderMat.m13 = physxMat.column3.y;
+        renderMat.m14 = physxMat.column3.z;
+        renderMat.m15 = 1.0f; // Homogeneous coordinates
+
+        Window::renderManager->AddModelToRenderBuffer(model, renderMat);
     }
 }
 
 /**
  * SetHitbox
- * Creates a physical body (RigidDynamic) and attaches it to the entity.
+ * Creates a physical body and attaches it to the entity.
  */
-void Entity::SetHitbox(PxGeometry* pgeometry) {
+void Entity::SetHitbox(PxGeometry* pgeometry, bool make_dynamic) {
     if (pgeometry == nullptr) {
         RF_LOG_WARN("Called with null geometry");
         return;
@@ -118,18 +119,25 @@ void Entity::SetHitbox(PxGeometry* pgeometry) {
     initialTransform.q = PxQuat(PxIdentity);
 
     if (hitbox == nullptr) {
-        hitbox = Window::physicsManager->Physics->createRigidDynamic(initialTransform);
+
+        // Make the rigid body dynamic or static
+        if (make_dynamic) hitbox = (PxRigidDynamic*)Window::physicsManager->Physics->createRigidDynamic(initialTransform);
+        else hitbox = Window::physicsManager->Physics->createRigidDynamic(initialTransform);
         // Link the PhysX actor back to this instance for collision callbacks
         hitbox->userData = (void*)this;
     }
 
     // 3. Create Shape and Material
     PxMaterial* material = Window::modelManager->GetModelMaterial(modelID);
-    PxShape* shape = PxRigidActorExt::createExclusiveShape(*hitbox, geometry, *material);
+    PxShape* shape = Window::physicsManager->CreateShape(&geometry, material);
 
     // Fine-tune collision offsets for stability
     shape->setContactOffset(0.02f);
     shape->setRestOffset(0.0f);
+
+    // Asing the shape to the hitbox
+    hitbox->attachShape(*shape);
+
 
     // 4. Finalize physical properties
     PxRigidBodyExt::setMassAndUpdateInertia(*hitbox, mass);
@@ -137,7 +145,7 @@ void Entity::SetHitbox(PxGeometry* pgeometry) {
     hitbox->setAngularVelocity(PxVec3(0));
 
     // Performance: Object will stop calculating when movement is minimal
-    hitbox->setSleepThreshold(0.2f);
+    if (make_dynamic) ((PxRigidDynamic*)hitbox)->setSleepThreshold(0.2f);
 }
 
 void Entity::Update() {

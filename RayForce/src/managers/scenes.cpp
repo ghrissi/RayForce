@@ -12,6 +12,8 @@ SceneManager::~SceneManager() {
 void SceneManager::LoadScene(Scene* scene) {
     if (scene == nullptr) return;
 
+    RF_LOG_INFO("Loaded Scene with ptr %d", (unsigned int)scene);
+
     // Clean up previous scene resources before switching
     if (currentScene != nullptr) {
         UnloadScene();

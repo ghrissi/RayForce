@@ -161,6 +161,9 @@ PxGeometry* PhysicsManager::CreateGeometry(uint16_t _modelID) {
 
     PxGeometry* geometry = new PxConvexMeshGeometry(convexMesh);
     loadedGeometries[_modelID] = geometry;
+
+    RF_LOG_INFO("Created Geometry asing to Model ID %d", (unsigned int)_modelID);
+
     return geometry;
 }
 
@@ -192,7 +195,10 @@ void PhysicsManager::DeleteGeometry(PxGeometry* geo) {
 // --- Shapes & Collision Logic ---
 
 PxShape* PhysicsManager::CreateShape(PxGeometry* geometry, PxMaterial* material) {
-    if (!geometry || !material) return nullptr;
+    if (!geometry || !material) { 
+        RF_LOG_WARN("The geometry or the material pointers where null");
+        return nullptr; 
+    }
 
     auto it = loadedShapes.find(geometry);
     if (it != loadedShapes.end()) return it->second;
@@ -200,6 +206,8 @@ PxShape* PhysicsManager::CreateShape(PxGeometry* geometry, PxMaterial* material)
     // Creates the shape as exclusive (true) to bind it specifically to one actor
     PxShape* shape = Physics->createShape(*geometry, *material, true);
     loadedShapes[geometry] = shape;
+
+    RF_LOG_INFO("Created Shape asing to Geometry ptr %d", (unsigned int)geometry);
     return shape;
 }
 

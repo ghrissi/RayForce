@@ -10,9 +10,9 @@
 class Entity {
 protected:
     // Transformation Data
-    Matrix worldMatrix;             // Final transformation matrix for rendering
-    Quaternion rotationQuat = { 0.0f, 0.0f, 0.0f, 1.0f }; // Internal orientation
+    PxTransform transform;
 
+    Quaternion rotationQuat = { 0, 0, 0, 1 }; // Rotation Quat
     Vector3 position = { 0, 0, 0 };
     Vector3 rotation = { 0, 0, 0 }; // Euler angles (degrees)
     Vector3 scale = { 1, 1, 1 };
@@ -30,7 +30,7 @@ public:
      * Represents the physical body in the simulation.
      * Initialized via SetHitbox() for objects that require collision.
      */
-    PxRigidDynamic* hitbox = nullptr;
+    PxRigidBody* hitbox = nullptr;
 
     /**
      * Constructor
@@ -49,6 +49,7 @@ public:
      * PhysicsUpdate
      * Pulls the latest Transform/Pose from the PhysX simulation and
      * applies it to the internal position and rotation variables.
+     * Call this only when needed to update position, rotation, and velocity data.
      */
     void PhysicsUpdate();
 
@@ -57,7 +58,7 @@ public:
      * Creates and attaches a physical body to the entity using the provided geometry.
      * @param geometry: The "cooked" physical shape (Box, Convex Mesh, etc).
      */
-    void SetHitbox(PxGeometry* geometry);
+    void SetHitbox(PxGeometry* pgeometry, bool make_dynamic = true);
 
     /**
      * Sync
@@ -68,6 +69,7 @@ public:
 
     /**
      * Render
+     * And Gets the Matrix Info directly
      * Submits the entity's current world matrix to the RenderManager's instancing buffer.
      */
     void Render();

@@ -61,6 +61,8 @@ done:
         model.materials[i].shader = shdr;
     }
 
+    RF_LOG_INFO("Loaded Model with ID %d", id);
+
     models[id] = model;
     return models.at(id);
 };
