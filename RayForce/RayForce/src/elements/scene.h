@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../globals.h"
-#include "../entities/entity.h"
+#include "../elements/entity.h"
 #include "../window.h"
 
 class Scene {

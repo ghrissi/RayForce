@@ -1,5 +1,5 @@
 #pragma once
-#include "entity.h"
+#include "../RayForce.h"
 
 /**
  * TestEntity Class

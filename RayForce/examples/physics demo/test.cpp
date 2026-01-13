@@ -1,6 +1,5 @@
+#include "testEntity.h"
 #include "test.h"
-#include "../entities/testEntity.h"
-#include "scene.h"
 
 // Configuration variables for the stress test
 ModelID model = ModelID::Cube;
@@ -69,6 +68,19 @@ void Test::Tick() {
         else {
             EnableCursor();
             toggleMouse = true;
+        }
+    }
+
+    // Toggles full screen
+    if (IsKeyPressed(KEY_F11)) {
+        if (!IsWindowFullscreen()) {
+            int monitor = GetCurrentMonitor();
+            SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
+            ToggleFullscreen();
+        }
+        else {
+            ToggleFullscreen();
+            if (window != nullptr) SetWindowSize(window->width, window->height);
         }
     }
 }

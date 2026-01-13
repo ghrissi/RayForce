@@ -15,78 +15,79 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\main.cpp">
+    <ClCompile Include="examples\physics demo\testEntity.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="src\managers\model.cpp">
+    <ClCompile Include="examples\physics demo\test.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="src\entities\entity.cpp">
+    <ClCompile Include="examples\physics demo\main.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="src\window.cpp">
+    <ClCompile Include="RayForce\src\elements\entity.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="src\managers\scenes.cpp">
+    <ClCompile Include="RayForce\src\elements\scene.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="src\scenes\scene.cpp">
+    <ClCompile Include="RayForce\src\managers\model.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="src\scenes\test.cpp">
+    <ClCompile Include="RayForce\src\managers\physics.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="src\entities\testEntity.cpp">
+    <ClCompile Include="RayForce\src\managers\render.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="src\managers\physics.cpp">
+    <ClCompile Include="RayForce\src\managers\scenes.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="src\exwindows.cpp">
+    <ClCompile Include="RayForce\src\exwindows.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="src\managers\render.cpp">
+    <ClCompile Include="RayForce\src\window.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="src\managers\models.list" />
-    <None Include="src\managers\materials.list" />
     <None Include="resources\shaders\instancing.vs" />
     <None Include="resources\shaders\basic.fs" />
     <None Include="resources\models\Cube.glb" />
     <None Include="resources\models\DamagedHelmet.glb" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\managers\model.h">
+    <ClInclude Include="examples\physics demo\testEntity.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="src\globals.h">
+    <ClInclude Include="examples\physics demo\test.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="src\entities\entity.h">
+    <ClInclude Include="RayForce\RayForce.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="src\window.h">
+    <ClInclude Include="RayForce\src\elements\entity.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="src\scenes\scene.h">
+    <ClInclude Include="RayForce\src\elements\scene.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="src\managers\scenes.h">
+    <ClInclude Include="RayForce\src\managers\model.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="src\scenes\test.h">
+    <ClInclude Include="RayForce\src\managers\physics.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="src\entities\testEntity.h">
+    <ClInclude Include="RayForce\src\managers\render.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="src\managers\physics.h">
+    <ClInclude Include="RayForce\src\managers\scenes.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="src\managers\render.h">
+    <ClInclude Include="RayForce\src\globals.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="RayForce\src\window.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>

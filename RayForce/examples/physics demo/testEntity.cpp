@@ -1,6 +1,5 @@
 #include "testEntity.h"
-#include "../managers/physics.h"
-#include "../window.h"
+#include "../RayForce/RayForce.h"
 
 /**
  * Init

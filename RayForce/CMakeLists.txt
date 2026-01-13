@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.10)
 project(RayForce)
 
 # 0. OUTPUT CONFIGURATION
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+# Executables will be placed in the /bin folder within the build directory
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
 
 # 1. BUILD CONFIGURATION
-# Default to Release mode if no build type is specified for maximum performance
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
@@ -13,9 +13,8 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Optimization Flags for Linux (x86 and ARM compatible)
+# Optimization Flags for Linux (Performance focused)
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    # -O3 and -ffast-math provide high-performance math optimizations
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -ffast-math")
     add_definitions(-DNDEBUG)
 else()
@@ -23,15 +22,13 @@ else()
     add_definitions(-D_DEBUG)
 endif()
 
-# Disable CUDA if building for non-NVIDIA systems or general Linux compatibility
+# Disable CUDA for general Linux compatibility
 add_definitions(-DDONT_USE_CUDA)
 
 # 2. DEPENDENCY DISCOVERY
-# Attempt to find Raylib via the system's CMake package registry
 find_package(raylib 5.5 QUIET) 
 
-# 3. PHYSX PATH CONFIGURATION
-# Allows users to pass a custom path via: cmake -DPHYSX_PATH=/custom/path ..
+# PhysX Path Setup
 if(NOT PHYSX_PATH)
     set(PHYSX_PATH "/usr/local")
 endif()
@@ -39,38 +36,46 @@ endif()
 set(PHYSX_INCLUDE_DIR "${PHYSX_PATH}/include")
 set(PHYSX_LIB_DIR "${PHYSX_PATH}/lib")
 
-# 4. SOURCE CODE DISCOVERY
-# Recursively find all C++ files within the src directory
-file(GLOB_RECURSE SOURCES "src/*.cpp")
+# 3. CORE LIBRARY DEFINITION
+# We compile the main source code into a static library to avoid recompiling it for every example
+file(GLOB_RECURSE CORE_SOURCES "RayForce/src/*.cpp")
+add_library(${PROJECT_NAME}_lib STATIC ${CORE_SOURCES})
 
-# 5. EXECUTABLE DEFINITION
-add_executable(${PROJECT_NAME} ${SOURCES})
-
-# 6. INCLUDE DIRECTORIES
-target_include_directories(${PROJECT_NAME} PUBLIC 
+target_include_directories(${PROJECT_NAME}_lib PUBLIC 
     ${PHYSX_INCLUDE_DIR}
     "${PHYSX_INCLUDE_DIR}/physx"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src"
+    "${CMAKE_CURRENT_SOURCE_DIR}/RayForce/src"
 )
 
-# 7. LIBRARY LINKING (Linux Structure)
-# Note: Link order for PhysX is critical for GCC/Clang to resolve symbols correctly.
-target_link_libraries(${PROJECT_NAME}
-    # System Dependencies
-    m          # Math library
-    pthread    # Multithreading support
-    dl         # Dynamic linking
-    rt         # Real-time extensions
-    GL         # OpenGL
-    X11        # Windowing system
-    
-    # Visual Framework
-    raylib
+# 4. AUTOMATIC EXAMPLES COMPILATION
+# This block iterates through every subfolder in the "examples" directory
+file(GLOB EXAMPLE_DIRS "examples/*")
 
-    # NVIDIA PhysX Static Libraries
-    "${PHYSX_LIB_DIR}/libPhysXExtensions_static_64.a"
-    "${PHYSX_LIB_DIR}/libPhysXCooking_static_64.a"
-    "${PHYSX_LIB_DIR}/libPhysX_static_64.a"
-    "${PHYSX_LIB_DIR}/libPhysXCommon_static_64.a"
-    "${PHYSX_LIB_DIR}/libPhysXFoundation_static_64.a"
-)
+foreach(DIR ${EXAMPLE_DIRS})
+    if(IS_DIRECTORY ${DIR})
+        # Extract the folder name to use as the executable name
+        get_filename_component(EXAMPLE_NAME ${DIR} NAME)
+        
+        # Find all .cpp source files inside the specific example folder
+        file(GLOB_RECURSE EXAMPLE_SOURCES "${DIR}/*.cpp")
+        
+        if(EXAMPLE_SOURCES)
+            message(STATUS "Configuring example: ${EXAMPLE_NAME}")
+            
+            # Define the executable using the folder name
+            add_executable(${EXAMPLE_NAME} ${EXAMPLE_SOURCES})
+            
+            # Link the example with the core library and external dependencies
+            target_link_libraries(${EXAMPLE_NAME}
+                ${PROJECT_NAME}_lib
+                raylib
+                m pthread dl rt GL X11
+                "${PHYSX_LIB_DIR}/libPhysXExtensions_static_64.a"
+                "${PHYSX_LIB_DIR}/libPhysXCooking_static_64.a"
+                "${PHYSX_LIB_DIR}/libPhysX_static_64.a"
+                "${PHYSX_LIB_DIR}/libPhysXCommon_static_64.a"
+                "${PHYSX_LIB_DIR}/libPhysXFoundation_static_64.a"
+            )
+        endif()
+    endif()
+endforeach()

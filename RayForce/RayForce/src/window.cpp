@@ -1,5 +1,5 @@
 #include "window.h"
-#include "scenes/scene.h"
+#include "elements/scene.h"
 
 // Static member initialization
 SceneManager* Window::sceneManager = nullptr;

@@ -105,23 +105,10 @@ void Scene::Render() {
  * Handles logic, input, physics synchronization, and entity lifecycle.
  */
 void Scene::Update() {
-    // 1. Input: Fullscreen Toggle Management
-    if (IsKeyPressed(KEY_F11)) {
-        if (!IsWindowFullscreen()) {
-            int monitor = GetCurrentMonitor();
-            SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
-            ToggleFullscreen();
-        }
-        else {
-            ToggleFullscreen();
-            if (window != nullptr) SetWindowSize(window->width, window->height);
-        }
-    }
-
-    // 2. Physics Sync: Wait for simulation results to be ready
+    // 1. Physics Sync: Wait for simulation results to be ready
     physicsScene->fetchResults(true);
 
-    // 3. Scripting: Call custom tick logic for the scene
+    // 2. Scripting: Call custom tick logic for the scene
     Tick();
 
     // 4. Entity Lifecycle & Sync
@@ -139,7 +126,7 @@ void Scene::Update() {
         entity->Update();
     }
 
-    // 5. Scene Switching: Load new scene if a transition was requested
+    // 3. Scene Switching: Load new scene if a transition was requested
     if (nextScene != nullptr) {
         Window::sceneManager->LoadScene(nextScene);
     }

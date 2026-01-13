@@ -1,6 +1,5 @@
-#include "globals.h"
-#include "window.h"
-#include "scenes/test.h"
+#include "../RayForce.h"
+#include "test.h"
 
 int main() {
     // Window constructor: Initializes the Raylib context and sets hardware flags.

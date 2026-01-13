@@ -1,5 +1,5 @@
 #include "scenes.h"
-#include "../scenes/scene.h"
+#include "../elements/scene.h"
 
 SceneManager::~SceneManager() {
     UnloadScene();
