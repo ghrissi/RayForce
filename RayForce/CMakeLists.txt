@@ -1,11 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 project(RayForce)
 
-# 0. OUTPUT CONFIGURATION
-# Executables will be placed in the /bin folder within the build directory
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 
-# 1. BUILD CONFIGURATION
+# 1. CONFIGURACIÓN DE COMPILACIÓN
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
@@ -13,63 +11,81 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Optimization Flags for Linux (Performance focused)
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -ffast-math")
-    add_definitions(-DNDEBUG)
-else()
-    set(CMAKE_CXX_FLAGS_DEBUG "-g")
+# SOLUCIÓN AL ERROR DE PUNTEROS Y RUTAS
+# -fpermissive: Ignora el error de cast de puntero a int (común en código viejo de Windows)
+# -Wno-error: Asegura que los warnings no detengan la compilación
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -Wno-error")
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-D_DEBUG)
+else()
+    add_definitions(-DNDEBUG)
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -ffast-math")
 endif()
 
-# Disable CUDA for general Linux compatibility
 add_definitions(-DDONT_USE_CUDA)
 
-# 2. DEPENDENCY DISCOVERY
+# 2. DEPENDENCIAS
 find_package(raylib 5.5 QUIET) 
-
-# PhysX Path Setup
 if(NOT PHYSX_PATH)
     set(PHYSX_PATH "/usr/local")
 endif()
-
-set(PHYSX_INCLUDE_DIR "${PHYSX_PATH}/include")
 set(PHYSX_LIB_DIR "${PHYSX_PATH}/lib")
 
-# 3. CORE LIBRARY DEFINITION
-# We compile the main source code into a static library to avoid recompiling it for every example
-file(GLOB_RECURSE CORE_SOURCES "RayForce/src/*.cpp")
-add_library(${PROJECT_NAME}_lib STATIC ${CORE_SOURCES})
+# ---------------------------------------------------------
+# 3. TRUCO "BRUTE FORCE" PARA INCLUDES
+# ---------------------------------------------------------
+# Buscamos TODAS las subcarpetas dentro de RayForce/src
+file(GLOB_RECURSE ALL_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/RayForce/src/*.h")
+set(MOTOR_DIRS "")
+foreach(_header ${ALL_HEADERS})
+    get_filename_component(_dir ${_header} DIRECTORY)
+    list(APPEND MOTOR_DIRS ${_dir})
+endforeach()
+list(REMOVE_DUPLICATES MOTOR_DIRS)
 
-target_include_directories(${PROJECT_NAME}_lib PUBLIC 
-    ${PHYSX_INCLUDE_DIR}
-    "${PHYSX_INCLUDE_DIR}/physx"
-    "${CMAKE_CURRENT_SOURCE_DIR}/RayForce/src"
+file(GLOB_RECURSE ENGINE_SOURCES 
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/RayForce/src/*.cpp"
 )
 
-# 4. AUTOMATIC EXAMPLES COMPILATION
-# This block iterates through every subfolder in the "examples" directory
-file(GLOB EXAMPLE_DIRS "examples/*")
+add_library(RayForceLib STATIC ${ENGINE_SOURCES})
 
-foreach(DIR ${EXAMPLE_DIRS})
+# Añadimos CADA subcarpeta como un include path independiente (-I)
+# Esto hace que "../entities/entity.h" se encuentre aunque la ruta relativa sea falsa
+target_include_directories(RayForceLib BEFORE PUBLIC 
+    ${MOTOR_DIRS}
+    "${CMAKE_CURRENT_SOURCE_DIR}/RayForce/src"
+    "${CMAKE_CURRENT_SOURCE_DIR}/RayForce"
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${PHYSX_PATH}/include"
+    "${PHYSX_PATH}/include/physx"
+)
+
+# ---------------------------------------------------------
+# 4. COMPILAR EJEMPLOS
+# ---------------------------------------------------------
+file(GLOB EXAMPLE_DIRS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/examples" "examples/*")
+
+foreach(DIR_NAME ${EXAMPLE_DIRS})
+    set(DIR "${CMAKE_CURRENT_SOURCE_DIR}/examples/${DIR_NAME}")
     if(IS_DIRECTORY ${DIR})
-        # Extract the folder name to use as the executable name
-        get_filename_component(EXAMPLE_NAME ${DIR} NAME)
-        
-        # Find all .cpp source files inside the specific example folder
+        string(REPLACE " " "_" SAFE_NAME ${DIR_NAME})
         file(GLOB_RECURSE EXAMPLE_SOURCES "${DIR}/*.cpp")
         
         if(EXAMPLE_SOURCES)
-            message(STATUS "Configuring example: ${EXAMPLE_NAME}")
-            
-            # Define the executable using the folder name
-            add_executable(${EXAMPLE_NAME} ${EXAMPLE_SOURCES})
-            
-            # Link the example with the core library and external dependencies
-            target_link_libraries(${EXAMPLE_NAME}
-                ${PROJECT_NAME}_lib
-                raylib
-                m pthread dl rt GL X11
+            add_executable(${SAFE_NAME} ${EXAMPLE_SOURCES})
+
+            target_include_directories(${SAFE_NAME} PRIVATE 
+                "${DIR}" 
+                "${CMAKE_CURRENT_SOURCE_DIR}/examples"
+                "${CMAKE_CURRENT_SOURCE_DIR}"
+                ${MOTOR_DIRS}
+            )
+
+            target_link_libraries(${SAFE_NAME}
+                RayForceLib
+                raylib m pthread dl rt GL X11
                 "${PHYSX_LIB_DIR}/libPhysXExtensions_static_64.a"
                 "${PHYSX_LIB_DIR}/libPhysXCooking_static_64.a"
                 "${PHYSX_LIB_DIR}/libPhysX_static_64.a"
