@@ -221,7 +221,7 @@ void PhysicsManager::UnloadShape(PxGeometry* geometry) {
 
 // --- Main Engine Synchronization ---
 
-#include "../entities/entity.h"
+#include "../elements/entity.h"
 void PhysicsManager::UpdateEntities(PxScene* scene) {
     // Only fetch actors that have undergone a transform change (performance optimization)
     PxU32 nbActiveActors;
